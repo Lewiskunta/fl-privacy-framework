@@ -14,10 +14,10 @@ A federated learning system for training fraud detection models across geographi
 
 The primary contribution is not the fraud detection AUC. The contribution is the simultaneous analytical treatment of four coupled constraints within a single system:
 
-- **Aggregation frequency** — closed-form derivation of optimal local steps τ* from the non-IID FedAvg convergence bound, eliminating grid search
-- **Differential privacy** — RDP composition under full client participation, with honest accounting that declines to invoke subsampling amplification where it does not apply
-- **Communication compression** — top-k gradient sparsification achieving 50x bandwidth reduction with bounded convergence penalty
-- **Byzantine robustness** — variance-triggered median fallback with detection threshold grounded in sub-Gaussian tail bounds and a formally characterised adversarial hiding radius
+- **Aggregation frequency**: closed-form derivation of optimal local steps τ* from the non-IID FedAvg convergence bound, eliminating grid search
+- **Differential privacy**: RDP composition under full client participation, with honest accounting that declines to invoke subsampling amplification where it does not apply
+- **Communication compression**: top-k gradient sparsification achieving 50x bandwidth reduction with bounded convergence penalty
+- **Byzantine robustness**: variance-triggered median fallback with detection threshold grounded in sub-Gaussian tail bounds and a formally characterised adversarial hiding radius
 
 Each of these is typically addressed in isolation in the literature. The value of this work is their joint derivation.
 
