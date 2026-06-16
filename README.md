@@ -27,8 +27,8 @@ Each of these is typically addressed in isolation in the literature. The value o
 
 | Configuration | AUC | ε |
 |---|---|---|
-| Centralised (pooled data) | 98.1% | — |
-| Local-only (macro-avg) | 91.4% | — |
+| Centralised (pooled data) | 98.1% | - |
+| Local-only (macro-avg) | 91.4% | - |
 | FedAvg τ* + top-k + DP | **96.2%** | **≈ 4.7** |
 
 Full results table and experimental setup in the paper.
