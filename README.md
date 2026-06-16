@@ -1,8 +1,8 @@
 # Federated Learning for Privacy-Preserving Fraud Detection
 
 **Lewis Feisal Injai**  
-Masters of Engineering, Data Science & Mathematics · UCLA  
-Capstone Project · Cathay Bank, Los Angeles · March - November 2023
+Masters of Engineering, Data Science & Mathematics · UCLA Capstone Project 
+Cathay Bank, Los Angeles · March - November 2023
 
 [Read the paper](https://lewiskunta.github.io/fl-privacy-framework/)
 
