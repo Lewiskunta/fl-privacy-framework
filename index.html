@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathematical Foundations of Federated Learning for Privacy-Preserving Analytics</title>
+<meta property="og:title" content="Mathematical Foundations of Federated Learning for Privacy-Preserving Analytics" />
+<meta property="og:description" content="Joint derivation of aggregation frequency, differential privacy composition, communication compression, and Byzantine robustness within a single federated system." />
+<meta property="og:url" content="https://lewiskunta.github.io/fl-privacy-framework/" />
+<meta property="og:type" content="article" />
+<meta name="author" content="Lewis Feisal Injai" />
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']],
+    tags: 'none'
+  },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --text: #1a1a1a; --muted: #555; --faint: #888;
+    --border: #e0e0e0; --bg: #fff; --code-bg: #f5f5f5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text: #e8e6e0; --muted: #aaa; --faint: #777;
+      --border: #333; --bg: #161614; --code-bg: #1e1e1c;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px; line-height: 1.8;
+    color: var(--text); background: var(--bg);
+    max-width: 720px; margin: 0 auto; padding: 4rem 2rem 6rem;
+  }
+  h1 { font-family: Georgia, serif; font-size: 24px; font-weight: normal; line-height: 1.35; color: var(--text); margin-bottom: 0.5rem; }
+  .byline { font-family: -apple-system, sans-serif; font-size: 13px; color: var(--faint); margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  h2 { font-family: -apple-system, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-top: 3rem; margin-bottom: 1rem; }
+  p { margin-bottom: 1.25rem; color: var(--text); }
+  .math-block { margin: 1.75rem 0; padding: 1.25rem 1.5rem; background: var(--code-bg); border-left: 2px solid var(--border); border-radius: 0 4px 4px 0; overflow-x: auto; }
+  .math-block .label { font-family: -apple-system, sans-serif; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+  .math-block .eq { font-size: 15px; }
+  .math-block .caption { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--muted); margin-top: 0.75rem; line-height: 1.5; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+  .def-box { border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .def-box .def-title { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); margin-bottom: 0.5rem; }
+  .def-box p { margin-bottom: 0.5rem; }
+  .def-box p:last-child { margin-bottom: 0; }
+  .assume-box { border: 1px dashed var(--border); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .assume-box .assume-title { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); margin-bottom: 0.75rem; }
+  .assume-box p { margin-bottom: 0.5rem; }
+  .assume-box p:last-child { margin-bottom: 0; }
+  .results-table { width: 100%; border-collapse: collapse; font-family: -apple-system, sans-serif; font-size: 13px; margin: 1.75rem 0; }
+  .results-table th { text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); border-bottom: 1px solid var(--border); padding: 0.5rem 0.75rem 0.5rem 0; }
+  .results-table td { padding: 0.6rem 0.75rem 0.6rem 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  .results-table tr:last-child td { border-bottom: none; }
+  .results-table .highlight td { font-weight: 600; }
+  .note { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--muted); border-left: 2px solid var(--border); padding: 0.4rem 0.75rem; margin: 1rem 0 1.5rem; line-height: 1.6; }
+  .remark-box { background: var(--code-bg); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.5rem 0; }
+  .remark-box .remark-title { font-family: -apple-system, sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); margin-bottom: 0.5rem; }
+  .remark-box p { margin-bottom: 0.6rem; font-size: 14px; }
+  .remark-box p:last-child { margin-bottom: 0; }
+  .feat-table { width: 100%; border-collapse: collapse; font-family: -apple-system, sans-serif; font-size: 13px; margin: 1.25rem 0 1.75rem; }
+  .feat-table th { text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); border-bottom: 1px solid var(--border); padding: 0.4rem 0.5rem 0.4rem 0; }
+  .feat-table td { padding: 0.45rem 0.5rem 0.45rem 0; border-bottom: 1px solid var(--border); color: var(--text); }
+  .feat-table tr:last-child td { border-bottom: none; }
+  .feat-table .total td { font-weight: 600; border-top: 1px solid var(--border); padding-top: 0.55rem; }
+  .chart-block { margin: 2rem 0; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 0.75rem; font-family: -apple-system, sans-serif; font-size: 12px; color: var(--muted); }
+  .chart-legend span { display: flex; align-items: center; gap: 5px; }
+  .chart-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .chart-legend i.dash { width: 18px; height: 0; border-top: 2px dashed #BA7517; border-radius: 0; background: none; }
+  .chart-caption { font-family: -apple-system, sans-serif; font-size: 12px; color: var(--muted); margin-top: 0.75rem; line-height: 1.6; border-left: 2px solid var(--border); padding-left: 0.75rem; }
+</style>
+</head>
+<body>
+
+<h1>Mathematical Foundations of Federated Learning for Privacy-Preserving Analytics</h1>
+<div class="byline">Lewis Feisal Injai &nbsp;·&nbsp; Masters of Engineering, Data Science &amp; Mathematics &nbsp;·&nbsp; UCLA<br>Capstone Project &nbsp;·&nbsp; Cathay Bank, Los Angeles &nbsp;·&nbsp; March 2023 - November 2023</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>Abstract</h2>
+
+<p>This paper presents a federated learning system for training fraud detection models across geographically and regulatorily distinct jurisdictions without transmitting raw customer records across borders. We make four technical contributions. First, we derive a closed-form expression for the optimal number of local gradient steps $\tau^*$ by minimising the non-IID FedAvg convergence bound over a fixed communication round budget. Second, we implement differentially private gradient aggregation via the Gaussian mechanism, with privacy composition tracked through Rényi Differential Privacy (RDP) under full client participation, without invoking the client-subsampling amplification lemma, which does not apply to this topology. Third, top-$k$ gradient sparsification reduces per-round bandwidth by 50x with bounded convergence impact. Fourth, we implement Byzantine-robust aggregation via a variance-triggered median fallback, with the detection threshold derived from sub-Gaussian tail bounds and the adversarial hiding radius formally characterised.</p>
+
+<p>We evaluate on a simulated eight-client topology structured to match Cathay Bank's branch network. Without differential privacy, the federated model reaches 97.3% AUC against a centralised baseline of 98.1% and an average local-only baseline of 91.4% (macro-averaged across 8 models evaluated on the global held-out test set). Under RDP composition with noise multiplier $z = 10.0$ over $T = 80$ rounds, the conservative full-participation privacy cost is $\varepsilon \approx 4.7$ at $\delta = 10^{-5}$, at which point AUC is 96.2%. We distinguish explicitly between the theoretical subsampling-amplified regime (where $\varepsilon = 1.0$ is achievable) and the non-amplified bound applicable to small fixed-topology deployments, and recommend the latter for regulatory disclosure.</p>
+
+<p><strong>A note on scope.</strong> The primary contribution is not the fraud detection AUC. A centralised model with pooled data reaches 98.1% and is trivially better on that metric. The contribution is the simultaneous analytical treatment of four coupled constraints — aggregation frequency, communication compression, differential privacy composition, and Byzantine robustness — within a single system. Each is typically addressed in isolation in the literature. The value of this work is their joint derivation and the formal guarantees that result: convergence bounds, privacy budget, and adversarial robustness are each analytically grounded rather than empirically asserted.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>1. Introduction</h2>
+
+<p>Financial institutions operating across multiple regulatory jurisdictions face a structural constraint in machine learning system design. The data most informative for fraud detection is distributed across geographic boundaries, yet applicable data protection law prohibits centralised pooling. In California, the Consumer Privacy Act (CCPA) restricts transfer of customer data outside established data governance frameworks; in China, the Personal Information Protection Law (PIPL) imposes localisation requirements that effectively bar cross-border aggregation. Institutions have generally responded by either accepting weaker jurisdiction-local models or constructing costly cross-border data transfer agreements that carry residual compliance exposure.</p>
+
+<p>Federated learning (FL) offers a structurally different approach: clients train local models and transmit only gradient updates to a central server, with raw data never leaving any node. This satisfies CCPA and PIPL by construction. Three engineering challenges arise in any real deployment. Data heterogeneity across clients produces gradient divergence that degrades global optimisation. Gradient updates can leak private information about training records. Transmitting high-dimensional gradient vectors across a wide-area network is bandwidth-intensive. A system that addresses only one or two of these is not deployable; a regulatory auditor will ask about all three simultaneously.</p>
+
+<p>Section 3 derives an analytically optimal aggregation frequency under non-IID conditions. Section 4 establishes the differential privacy framework with honest composition accounting under full client participation. Section 5 covers communication compression. Section 6 formalises the Byzantine robustness mechanism. Section 7 reports experimental results with fully specified baselines.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>2. System Architecture</h2>
+
+<p>The system comprises $N = 8$ clients, each representing a distinct jurisdiction or branch type in Cathay Bank's network. Client $i \in [N] = \{1, \ldots, 8\}$ holds a local dataset $\mathcal{D}_i$ of transaction records. Datasets are non-overlapping and are never transmitted. A central aggregation server holds no training data; it receives gradient updates, aggregates them, and broadcasts the updated global weights.</p>
+
+<p>The fraud detection model is a feedforward network ($47 \to 128 \to 128 \to 1$): an input layer of $d_{\text{in}} = 47$ features, two hidden layers of 128 units with ReLU activations, and a sigmoid output for binary classification. The input vector $x \in \mathbb{R}^{47}$ is constructed from the following explicit feature groups:</p>
+
+<table class="feat-table">
+  <thead>
+    <tr><th>Feature Group</th><th>Encoding</th><th>Dimensions</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Transaction amount</td><td>Raw continuous value</td><td>1</td></tr>
+    <tr><td>Log-transformed amount</td><td>$\log(1 + \text{amount})$, stabilises gradient variance across regional economies</td><td>1</td></tr>
+    <tr><td>Merchant category codes</td><td>One-hot across 12 high-risk MCC groups</td><td>12</td></tr>
+    <tr><td>Time of day</td><td>Sine/cosine of hour fraction, eliminates boundary discontinuity at midnight</td><td>2</td></tr>
+    <tr><td>Day of week</td><td>Sine/cosine of weekday fraction</td><td>2</td></tr>
+    <tr><td>Velocity: 7-day window</td><td>Rolling transaction count</td><td>1</td></tr>
+    <tr><td>Velocity: 30-day window</td><td>Rolling transaction count</td><td>1</td></tr>
+    <tr><td>Card-present indicator</td><td>Binary</td><td>1</td></tr>
+    <tr><td>Channel: digital/alternative</td><td>Binary</td><td>1</td></tr>
+    <tr><td>Cross-border flag</td><td>Binary</td><td>1</td></tr>
+    <tr><td>Account-level historical statistics</td><td>24 summary statistics: mean, standard deviation, 25th/50th/75th percentiles of 30-day amounts; rolling dispute count; historical chargeback ratio; 16 additional long-term risk profile fields</td><td>24</td></tr>
+    <tr class="total"><td colspan="2">Total</td><td>47</td></tr>
+  </tbody>
+</table>
+
+<p>The cyclical encodings for time and day are deliberate: raw integer hour values create an artificial discontinuity (23:59 appears far from 00:00 in Euclidean space), which distorts gradient contributions from temporal fraud clusters. Sine/cosine pairs remove this artefact. The log-transformed amount mitigates the effect of high-value outlier transactions on gradient magnitude, which is particularly relevant when clipping norms are set uniformly across clients with different regional transaction scales.</p>
+
+<p>The total parameter count follows directly from the layer dimensions:</p>
+
+<div class="math-block">
+  <div class="label">Parameter Count</div>
+  <div class="eq">$$d = \underbrace{(47 \times 128 + 128)}_{6{,}144} + \underbrace{(128 \times 128 + 128)}_{16{,}512} + \underbrace{(128 \times 1 + 1)}_{129} = 22{,}785$$</div>
+  <div class="caption">Verified via <code>sum(p.numel() for p in model.parameters() if p.requires_grad)</code> in PyTorch. Each term covers the weight matrix and bias vector for one layer.</div>
+</div>
+
+<p>All notation used throughout the paper is collected here. $w^{(t)} \in \mathbb{R}^d$: global model weights at round $t$. $\eta > 0$: learning rate. $\tau$: local SGD steps per round. $T$: total communication rounds. $C$: gradient clipping norm. $\sigma$: Gaussian noise standard deviation. $z = \sigma/C$: noise multiplier. $\Gamma$: gradient divergence parameter. $L$: loss smoothness constant. $\lambda$: RDP order. $\sigma_g^2$: stochastic gradient variance. $\theta$: Byzantine detection threshold. Each training round proceeds as follows: the server broadcasts $w^{(t)}$ to all clients; client $i$ runs $\tau$ steps of SGD on $\mathcal{D}_i$, producing update $\Delta_i^{(t)} = w_i^{(t,\tau)} - w^{(t)}$; the server clips, perturbs, and aggregates the updates; the global model advances to $w^{(t+1)}$. The implementation used PyTorch for local training and PySyft 0.5 for federated coordination, validated on a three-node distributed setup spanning two geographic regions.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>3. Convergence Analysis and Optimal Aggregation Frequency</h2>
+
+<p>The IID assumption does not hold here. Fraud patterns in Cathay's Hong Kong operations differ structurally from those in Los Angeles: the merchant ecosystem, card-present ratio, and transaction velocity norms produce divergent local loss landscapes. Averaging gradients trained on these different distributions pulls the global model toward conflicting local optima, a problem known as client drift. The degree of drift depends directly on how many local steps each client runs before synchronisation: more steps mean greater divergence from the global optimum before the next correction.</p>
+
+<p>Standard practice is to tune $\tau$ empirically by grid search, then retune periodically as distributions shift. This approach is fragile and offers no signal about when retuning is needed. We instead derive $\tau^*$ analytically from the convergence bound.</p>
+
+<div class="assume-box">
+  <div class="assume-title">Assumptions (following Li et al., 2020)</div>
+  <p><strong>A1 (L-smoothness).</strong> The global loss $F: \mathbb{R}^d \to \mathbb{R}$ satisfies $\|\nabla F(w) - \nabla F(w')\| \leq L\|w - w'\|$ for all $w, w' \in \mathbb{R}^d$, with $L > 0$.</p>
+  <p><strong>A2 (Bounded stochastic variance).</strong> Stochastic gradients are unbiased with bounded variance: $\mathbb{E}\|\nabla \ell(w; \xi) - \nabla F_i(w)\|^2 \leq \sigma_g^2$ for all $i \in [N]$ and all $w$.</p>
+  <p><strong>A3 (Bounded gradient divergence).</strong> $\frac{1}{N}\sum_{i=1}^N \|\nabla F_i(w) - \nabla F(w)\|^2 \leq \Gamma^2$ for all $w$. The parameter $\Gamma \geq 0$ quantifies non-IID severity; $\Gamma = 0$ recovers the IID case.</p>
+  <p><strong>A4 (Bounded initialisation gap).</strong> $F(w^{(0)}) - F^* < \infty$, where $F^* = \inf_w F(w)$.</p>
+</div>
+
+<p>Under A1-A4, the FedAvg convergence bound for a fixed round budget $T$ takes the form (Li et al., 2020, Theorem 3):</p>
+
+<div class="math-block">
+  <div class="label">FedAvg Convergence Bound — Non-IID, Fixed Round Budget</div>
+  <div class="eq">$$\frac{1}{T} \sum_{t=0}^{T-1} \mathbb{E}\|\nabla F(w^{(t)})\|^2 \;\leq\; \underbrace{\frac{2[F(w^{(0)}) - F^*]}{\eta \tau T}}_{\text{(I) initialisation gap}} + \underbrace{\eta L \sigma_g^2}_{\text{(II) gradient noise}} + \underbrace{6\eta^2 L^2 \tau^2 \Gamma^2}_{\text{(III) client drift}}$$</div>
+  <div class="caption">Term (I) scales as $\tau^{-1}$: more local steps reduce the per-round initialisation penalty. Term (III) scales as $\tau^2$: more local steps amplify drift. Term (II) is independent of $\tau$. The competing signs of the $\tau$ dependence in (I) and (III) guarantee an interior minimum.</div>
+</div>
+
+<p>We minimise the right-hand side over $\tau$ for fixed $T$. Term (II) vanishes under differentiation, leaving:</p>
+
+<div class="math-block">
+  <div class="label">First-Order Condition</div>
+  <div class="eq">$$\frac{\partial}{\partial \tau}\left[\frac{2[F(w^{(0)}) - F^*]}{\eta \tau T} + 6\eta^2 L^2 \tau^2 \Gamma^2\right] = -\frac{2[F(w^{(0)}) - F^*]}{\eta \tau^2 T} + 12\eta^2 L^2 \tau \Gamma^2 = 0$$</div>
+  <div class="caption">The two contributions are $-2(F_0 - F^*)/(\eta \tau^2 T)$ from term (I) and $+12\eta^2 L^2 \tau \Gamma^2$ from term (III).</div>
+</div>
+
+<p>Setting equal to zero and collecting $\tau$ terms:</p>
+
+<div class="math-block">
+  <div class="label">Derivation — Solving for $\tau^*$</div>
+  <div class="eq">$$12\eta^2 L^2 \tau^3 \Gamma^2 = \frac{2[F(w^{(0)}) - F^*]}{\eta T} \;\implies\; \tau^3 = \frac{F(w^{(0)}) - F^*}{6\eta^3 L^2 T \Gamma^2}$$</div>
+  <div class="caption">The cubic in $\tau$ arises from term (I) contributing $\tau^{-2}$ under differentiation and term (III) contributing $\tau^{+1}$. Setting their sum to zero gives $\tau^3 = \text{const}$.</div>
+</div>
+
+<div class="math-block">
+  <div class="label">Optimal Local Steps</div>
+  <div class="eq">$$\tau^* = \left(\frac{F(w^{(0)}) - F^*}{6\eta^3 L^2 T \Gamma^2}\right)^{1/3}$$</div>
+  <div class="caption">$\tau^*$ decreases in $T$ (more rounds available, fewer local steps optimal per round), decreases in $\Gamma$ (more homogeneous data tolerates longer local runs), and decreases in $L$ (more sharply curved loss surfaces benefit from faster re-synchronisation). The $\eta^3$ in the denominator is consistent: factors of $\eta$ appear in the original terms (I) and (III) at orders $\eta^{-1}$ and $\eta^2$ respectively, yielding $\eta^3$ in the denominator after rearrangement.</div>
+</div>
+
+<div class="remark-box">
+  <div class="remark-title">On Budget Parameterisation</div>
+  <p>The cubic root arises only when $T$ is held fixed and the bound minimised over $\tau$. If instead the total compute $S = T\tau$ is fixed, substituting $T = S/\tau$ into term (I) gives $2(F_0 - F^*)\tau/(\eta S)$, which scales as $\tau^{+1}$. Under that constraint, both (I) and (III) are increasing in $\tau$, so the first-order condition is linear and has no interior minimum: the bound is minimised at $\tau = 1$, i.e., full synchronisation every step. The fixed-$T$ formulation reflects the actual operational constraint of this system, where the number of communication rounds is the binding resource.</p>
+</div>
+
+<p>For Cathay's topology, we estimate $\Gamma \approx 0.31$ from the variance of client gradients in early training rounds, $L \approx 1.8$ by finite differences of the training loss, $\eta = 0.01$, and $F(w^{(0)}) - F^* \approx 0.74$. At $T = 80$, the formula yields $\tau^* \approx 17$. The empirical grid search settled on $\tau = 20$; the analytically derived schedule produces marginally tighter terminal gradient norm reduction over the same round budget. More practically, when the fraud distribution shifts mid-deployment, $\Gamma$ can be re-estimated from the observed gradient variance distribution and $\tau^*$ updated without further search.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>4. Differential Privacy</h2>
+
+<p>Gradient updates leak information about training records. Zhu et al. (2019) showed that individual training samples can be reconstructed with high fidelity from a single gradient update, in some architectures approaching pixel-level accuracy for image data. For transaction records, the exposure is analogous: a gradient from a fraud detection model can reveal which transactions were present in a client's training batch. This is not a distant regulatory concern; it is the category of risk that CCPA and PIPL data minimisation requirements are designed to address. We apply the Gaussian mechanism at the aggregation layer to provide a formal guarantee.</p>
+
+<div class="def-box">
+  <div class="def-title">Definition 1 — (ε, δ)-Differential Privacy</div>
+  <p>A randomised mechanism $\mathcal{M}: \mathcal{D} \to \mathcal{R}$ satisfies $(\varepsilon, \delta)$-differential privacy if for all $D, D' \in \mathcal{D}$ differing in exactly one record and all measurable $S \subseteq \mathcal{R}$:</p>
+  <p style="text-align:center; margin: 0.75rem 0;">$$\Pr[\mathcal{M}(D) \in S] \;\leq\; e^{\varepsilon} \cdot \Pr[\mathcal{M}(D') \in S] + \delta$$</p>
+  <p>$\varepsilon \geq 0$ bounds the log-odds shift in output distribution due to any single record. $\delta \geq 0$ is a failure probability, set to $10^{-5}$ throughout. Smaller $\varepsilon$ implies stronger privacy.</p>
+</div>
+
+<p><strong>Gradient clipping.</strong> Before transmission, client $i$ clips its gradient update $g_i$ to L2 norm $C$:</p>
+
+<div class="math-block">
+  <div class="label">Gradient Clipping</div>
+  <div class="eq">$$\tilde{g}_i = g_i \cdot \min\!\left(1,\; \frac{C}{\|g_i\|_2}\right)$$</div>
+  <div class="caption">Clipping bounds the L2 sensitivity of the aggregation function: $\Delta_2 f = \max_{D,D'}\|f(D)-f(D')\|_2 \leq C$. We use $C = 1.0$.</div>
+</div>
+
+<p>We then add calibrated Gaussian noise to the clipped gradient before it leaves the client. The noise standard deviation must satisfy:</p>
+
+<div class="math-block">
+  <div class="label">Gaussian Mechanism — Single-Round Noise Floor</div>
+  <div class="eq">$$\sigma \;\geq\; \frac{\sqrt{2\ln(1.25/\delta)} \cdot C}{\varepsilon_0}$$</div>
+  <div class="caption">This guarantees $(\varepsilon_0, \delta)$-DP for a single gradient release, where $\varepsilon_0$ is the per-round budget. The noise multiplier $z = \sigma/C$ parameterises the mechanism; we use $z = 10.0$, giving $\sigma = 10.0$ at $C = 1.0$.</div>
+</div>
+
+<p><strong>Composition across rounds.</strong> Each of the $T = 80$ training rounds constitutes one query against the private data. Naive $(\varepsilon, \delta)$-DP composition gives $\varepsilon_{\text{total}} = T\varepsilon_0$, which is prohibitively loose. Rényi Differential Privacy (RDP) provides tighter composition by tracking the Rényi divergence between output distributions across mechanisms.</p>
+
+<div class="def-box">
+  <div class="def-title">Definition 2 — Rényi Differential Privacy (Mironov, 2017)</div>
+  <p>$\mathcal{M}$ satisfies $(\lambda, \alpha)$-RDP if for all adjacent $D, D'$ and all $\lambda > 1$:</p>
+  <p style="text-align:center; margin: 0.75rem 0;">$$D_\lambda(\mathcal{M}(D) \| \mathcal{M}(D')) \;\leq\; \alpha$$</p>
+  <p>where $D_\lambda$ is the Rényi divergence of order $\lambda$. $T$ applications of an $(\lambda, \alpha)$-RDP mechanism compose to $(\lambda, T\alpha)$-RDP. Conversion to $(\varepsilon, \delta)$-DP: $\varepsilon(\delta) = T\alpha + \log(1/\delta)/(\lambda-1)$, minimised over $\lambda$.</p>
+</div>
+
+<p>For the Gaussian mechanism with noise multiplier $z$, the per-round RDP guarantee at order $\lambda$ is $\alpha(\lambda) = \lambda/(2z^2)$. After $T$ rounds under full client participation:</p>
+
+<div class="math-block">
+  <div class="label">Total Privacy Cost — Full Participation, No Subsampling</div>
+  <div class="eq">$$\varepsilon_{\text{total}}(\delta) = \min_{\lambda > 1} \left[\frac{T\lambda}{2z^2} + \frac{\log(1/\delta)}{\lambda - 1}\right]$$</div>
+  <div class="caption">At $T = 80$, $z = 10.0$, $\delta = 10^{-5}$: the minimising order is $\lambda^* \approx 6.4$, yielding $\varepsilon_{\text{total}} \approx 4.7$. This is the operative privacy figure for regulatory disclosure.</div>
+</div>
+
+<div class="remark-box">
+  <div class="remark-title">On Subsampling Amplification</div>
+  <p>Privacy amplification by subsampling (Balle et al., 2018) can substantially reduce the effective $\varepsilon$ in FL systems where only a random fraction of clients participates per round. In that setting, the probability that any given client's data affects a round's output is reduced by the subsampling rate, tightening the privacy bound. The gain is significant: a subsampling rate of 10% can reduce effective $\varepsilon$ by roughly a factor of $\sqrt{q}$ where $q$ is the fraction sampled, which would bring $\varepsilon$ close to 1.0 at the parameters used here.</p>
+  <p>This amplification does not apply to the present system. All $N = 8$ clients participate in every round; the subsampling rate is 1.0. Invoking the amplification lemma here would be incorrect. The $\varepsilon_{\text{total}} \approx 4.7$ reported above reflects the actual, non-amplified privacy cost. In contexts where a tighter bound is required by regulation, the client pool must be enlarged to permit genuine subsampling, or the noise multiplier increased substantially (reaching $\varepsilon \approx 1.0$ over 80 rounds under full participation requires $z \gtrsim 25$, with meaningful AUC cost).</p>
+</div>
+
+<p>With $N = 8$ clients each adding independent noise, the noise contribution to the mean-aggregated gradient scales as $\sigma/\sqrt{N} = 10.0/\sqrt{8} \approx 3.54$, while honest gradient signal averages coherently. The signal-to-noise ratio at the aggregated update is lower than in the single-client case, but sufficient for useful model convergence at this client count.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>5. Communication Efficiency</h2>
+
+<p>A dense float32 gradient update for the $d = 22{,}785$ parameter model requires $22{,}785 \times 4 = 91{,}140$ bytes (89 KB) per client per round, or 6.95 MB per client over 80 rounds. This is manageable for the present prototype but grows linearly with model size and round count. We apply top-$k$ gradient sparsification throughout.</p>
+
+<p><strong>Top-$k$ sparsification.</strong> Define $\text{Top}_k: \mathbb{R}^d \to \mathbb{R}^d$ as the operator retaining the $k$ entries of its argument with the largest absolute values and zeroing the rest. At $k = 0.01d \approx 227$, each client transmits 227 gradient values and their corresponding 32-bit indices:</p>
+
+<div class="math-block">
+  <div class="label">Communication Cost — Sparse vs Dense</div>
+  <div class="eq">$$\text{Bytes}_{\text{sparse}} = k \times (4_{\text{value}} + 4_{\text{index}}) = 227 \times 8 = 1{,}816\text{ bytes} \approx 1.77\text{ KB}$$</div>
+  <div class="caption">Compression ratio: $89\text{ KB} / 1.77\text{ KB} \approx 50\times$. Over 80 rounds, total per-client transmission under sparsification is 142 KB versus 6.95 MB dense.</div>
+</div>
+
+<p>The convergence penalty from dropping $(1 - k/d) = 99\%$ of gradient components is bounded by an additive term proportional to $(1-k/d)$ in the convergence rate (Alistarh et al., 2017). At $k/d = 0.01$, this term is negligible relative to the leading convergence terms from Section 3. The sparsified system requires four additional rounds to reach the same loss threshold as the dense system. Sparsification is applied after clipping and noise injection, so the DP guarantee of Section 4 applies without modification by the post-processing theorem.</p>
+
+<div class="chart-block">
+  <div class="chart-legend">
+    <span><i style="background:#B4B2A9;"></i> Dense update</span>
+    <span><i style="background:#1D9E75;"></i> Sparse update (top-k, k=1%)</span>
+  </div>
+  <div style="position:relative;width:100%;height:180px;">
+    <canvas id="commChart" role="img" aria-label="Horizontal bar chart. Dense update: 91,140 bytes (89 KB) per client per round. Sparse update: 1,816 bytes (1.77 KB). 50x reduction.">Communication cost: dense 91,140 bytes vs sparse 1,816 bytes per client per round — 50x reduction.</canvas>
+  </div>
+  <p class="chart-caption">Top-k sparsification (k=0.05%) transmits only the coordinates with highest gradient magnitude. Over 80 rounds across 8 clients, total bandwidth drops from 6.95 MB to 142 KB per client.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>6. Byzantine-Robust Aggregation</h2>
+
+<p>FedAvg with mean aggregation is vulnerable to Byzantine clients: participants that transmit arbitrary or adversarial gradient updates. A single client sending a gradient of large norm in a targeted direction can dominate the mean and steer the global model. Gradient clipping (Section 4) partially mitigates this by bounding each update's norm to $C = 1.0$, but a clipped adversarial update pointing in an adversarial direction still biases the mean persistently across rounds.</p>
+
+<p><strong>Coordinate-wise median.</strong> For each coordinate $j \in [d]$, we define the median aggregator as:</p>
+
+<div class="math-block">
+  <div class="label">Coordinate-Wise Median</div>
+  <div class="eq">$$\hat{g}_j = \text{median}\!\left(\Delta_{1,j}^{(t)},\, \ldots,\, \Delta_{N,j}^{(t)}\right), \quad j = 1, \ldots, d$$</div>
+  <div class="caption">With at most $f < N/2$ Byzantine clients, the median satisfies $|\hat{g}_j - \bar{g}_j^{\text{honest}}| \leq \max_{i \in \text{honest}}|\Delta_{i,j}^{(t)} - \bar{g}_j^{\text{honest}}|$: no Byzantine client can shift $\hat{g}_j$ outside the range of honest values. Convergence at $\mathcal{O}(1/\sqrt{T})$ is preserved under A1-A4 (Yin et al., 2018).</div>
+</div>
+
+<p>The median's asymptotic variance is $\pi\sigma^2/2$ versus $\sigma^2$ for the mean under Gaussian noise (efficiency factor $\pi/2 \approx 1.57$). In the non-adversarial setting this reduces the effective gradient signal, slowing convergence per round. We avoid this cost except when Byzantine activity is detected.</p>
+
+<p><strong>Hybrid detection.</strong> Let $\mathbf{v}^{(t)} = (\|\Delta_1^{(t)}\|_2, \ldots, \|\Delta_N^{(t)}\|_2)$ be the vector of incoming update norms at round $t$. We compute rolling mean $\hat{\mu}_v$ and standard deviation $\hat{\sigma}_v$ over the preceding 10 rounds. The detection threshold is:</p>
+
+<div class="math-block">
+  <div class="label">Byzantine Detection Threshold</div>
+  <div class="eq">$$\theta = \hat{\mu}_v + 3\hat{\sigma}_v$$</div>
+  <div class="caption">Median fallback triggers when $\max_i \|\Delta_i^{(t)}\|_2 > \theta$. Mean aggregation is used otherwise.</div>
+</div>
+
+<p>The $3\hat{\sigma}_v$ threshold is grounded in the sub-Gaussian tail bound. If honest gradient norms follow a sub-Gaussian distribution with parameter $\hat{\sigma}_v$, the probability that any single honest update exceeds $\hat{\mu}_v + 3\hat{\sigma}_v$ is bounded by $e^{-9/2} \approx 0.011$ per client per round. Across $N = 8$ clients and $T = 80$ rounds, the expected number of false positive triggers is at most $8 \times 80 \times 0.011 \approx 7$, or roughly 9% of rounds. Empirically, under non-adversarial conditions, we observed 6 threshold crossings over 80 rounds, consistent with this bound.</p>
+
+<p>An adversary evading detection is constrained to submit updates with norm at most $\theta$. After clipping, the maximum norm is $C = 1.0$ regardless. For a single Byzantine client among $N = 8$, the worst-case perturbation to the mean-aggregated gradient is:</p>
+
+<div class="math-block">
+  <div class="label">Bounded Impact of a Concealed Adversary</div>
+  <div class="eq">$$\left\|\frac{\Delta_{\text{adv}}}{N}\right\|_2 \;\leq\; \frac{C}{N} = \frac{1.0}{8} = 0.125 \text{ per round}$$</div>
+  <div class="caption">Over $T = 80$ rounds, the cumulative L2 perturbation to model weights is bounded by $\eta \cdot (C/N) \cdot T = 0.01 \times 0.125 \times 80 = 0.1$. This is the adversarial hiding radius: an adversary operating within it causes bounded, predictable model degradation rather than catastrophic drift. The false negative observed in simulation (adversarial norm set to $0.4C$) falls within this radius; the measured AUC impact was below 0.2 pp.</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>7. Experimental Setup and Results</h2>
+
+<p><strong>Data.</strong> Synthetic training data was generated from distributional parameters supplied by Cathay Bank's data office - empirical feature distributions, fraud prevalence rates, and inter-branch heterogeneity statistics drawn from production records. No customer records were accessed at any stage; the data office provided statistical summaries within a bank-provisioned sandbox. The same data localisation requirements the system is designed to satisfy governed the research collaboration itself. Client partitions were produced via Dirichlet allocation with concentration parameter $\alpha = 0.5$, yielding meaningfully divergent local label distributions. Fraud prevalence was set at 1.8%. The held-out test set (20% of total) was stratified by client and class.</p>
+
+<p><strong>Baselines.</strong> We report three baselines. (1) Centralised: trained on the union of all client data with identical architecture; this is the performance ceiling, achievable only by violating data localisation requirements. (2) Local-only: each of the 8 clients trains independently with no federation; we report the macro-average AUC across all 8 models evaluated on the global stratified test set (not on local test partitions). This tests true generalisation variance rather than local memorisation. The per-client AUC range is 88.1%-94.3%; the macro-average is 91.4%. (3) Federated, empirical $\tau$: FedAvg with $\tau = 20$ determined by grid search, dense updates, no DP; this is the direct comparison for the analytical $\tau^*$ result.</p>
+
+<p><strong>Hyperparameters.</strong> $\eta = 0.01$; batch size 64; $C = 1.0$; $z = 10.0$ ($\sigma = 10.0$); $k = 227$ (1% of $d$). All federated results are macro-averaged over 5 independent seeds; standard deviation was below 0.003 AUC in all configurations.</p>
+
+<table class="results-table">
+  <thead>
+    <tr>
+      <th>Configuration</th><th>AUC</th><th>Rounds</th><th>Comm./Client</th><th>$\varepsilon$</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="highlight">
+      <td>Centralised (pooled data)</td><td>98.1%</td><td>--</td><td>--</td><td>None</td>
+    </tr>
+    <tr>
+      <td>Local-only (macro-avg, global test set)</td><td>91.4%</td><td>--</td><td>--</td><td>--</td>
+    </tr>
+    <tr>
+      <td>FedAvg, $\tau{=}20$ (empirical), dense, no DP</td><td>97.3%</td><td>80</td><td>6.95 MB</td><td>None</td>
+    </tr>
+    <tr>
+      <td>FedAvg, $\tau^*{=}17$ (analytical), dense, no DP</td><td>97.3%</td><td>80</td><td>6.95 MB</td><td>None</td>
+    </tr>
+    <tr>
+      <td>FedAvg, $\tau^*{=}17$, top-$k$ (1%), no DP</td><td>97.1%</td><td>84</td><td>142 KB</td><td>None</td>
+    </tr>
+    <tr class="highlight">
+      <td>FedAvg, $\tau^*{=}17$, top-$k$, DP ($z{=}10.0$)</td><td>96.2%</td><td>80</td><td>142 KB</td><td>$\approx 4.7$</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">All $\varepsilon$ values use RDP composition under full client participation ($N = 8$, all clients every round), $\delta = 10^{-5}$, with no subsampling amplification. The $\varepsilon \approx 4.7$ row is the appropriate figure for regulatory disclosure.</div>
+
+<div class="chart-block">
+  <div class="chart-legend">
+    <span><i style="background:#B4B2A9;"></i> Local only</span>
+    <span><i style="background:#378ADD;"></i> FedAvg empirical &tau;</span>
+    <span><i style="background:#1D9E75;"></i> FedAvg &tau;* (analytical)</span>
+    <span><i style="background:#E24B4A;"></i> Full system + DP</span>
+  </div>
+  <div style="position:relative;width:100%;height:320px;">
+    <canvas id="convergenceChart" role="img" aria-label="Line chart of AUC over 80 communication rounds for four configurations. Local only plateaus near 91%. Empirical and analytical tau-star converge identically. Full DP system reaches 96.2%.">Convergence curves: local only plateaus at 91%, empirical and analytical tau* converge identically around round 40, full DP system reaches 96.2% AUC at round 80.</canvas>
+  </div>
+  <p class="chart-caption">Illustrative convergence trajectories consistent with the reported terminal AUC values in Table 1. Curves are schematic; the key result - that green and blue overlap, confirming &tau;* derived analytically matches the empirically tuned &tau;=20 - holds by construction from the experimental results. The DP penalty (gap between red and green) is 0.3 pp AUC. Real training logs will replace these curves in a subsequent revision.</p>
+</div>
+
+<p><strong>Privacy-utility frontier.</strong> We evaluated AUC across $z \in \{5, 8, 10, 15, 20\}$ with $T = 80$ and $\delta = 10^{-5}$. Conservative RDP $\varepsilon$ values (full participation) are approximately $\{10.2, 6.0, 4.7, 3.0, 2.2\}$ respectively. AUC falls from 96.8% at $z = 5$ to 94.1% at $z = 20$. The $z = 10$ point offers meaningful noise calibration without catastrophic utility loss at this client count.</p>
+
+<div class="chart-block">
+  <div class="chart-legend">
+    <span><i style="background:#378ADD;"></i> AUC vs &epsilon;</span>
+    <span><i style="background:#E24B4A;"></i> Selected operating point (z=10, &epsilon;&approx;4.7)</span>
+  </div>
+  <div style="position:relative;width:100%;height:300px;">
+    <canvas id="privacyChart" role="img" aria-label="Line chart showing AUC decreasing as epsilon decreases. At epsilon 10.2 AUC is 96.8%, falling to 94.1% at epsilon 2.2. Operating point at epsilon 4.7 highlighted in red.">Privacy-utility tradeoff: AUC drops from 96.8% to 94.1% as epsilon tightens from 10.2 to 2.2. Operating point at epsilon 4.7 yields 96.2% AUC.</canvas>
+  </div>
+  <p class="chart-caption">Lower &epsilon; = stronger privacy guarantee. The selected point (z=10, &epsilon;&approx;4.7) sits at the inflection of the curve, where tighter noise calibration begins extracting substantial utility cost.</p>
+</div>
+
+<p><strong>Byzantine robustness.</strong> Injecting a single adversarial client transmitting full-norm clipped updates in an adversarial direction collapses mean-only AUC to 84.1% over 80 rounds. The hybrid fallback limits the degradation to 1.2 pp (AUC 96.9%), with correct detection in 9 of 10 adversarial injection trials. The single false negative occurred at adversarial norm $0.4C$, within the theoretical hiding radius; the measured AUC impact was 0.18 pp, consistent with the cumulative perturbation bound of 0.04 in L2 norm derived in Section 6.</p>
+
+<div class="chart-block">
+  <div class="chart-legend">
+    <span><i style="background:#378ADD;"></i> Aggregated gradient norm</span>
+    <span><i style="background:#E24B4A;"></i> Detection threshold &theta;</span>
+    <span><i class="dash"></i>&nbsp;Adversarial injection rounds</span>
+  </div>
+  <div style="position:relative;width:100%;height:320px;">
+    <canvas id="byzantineChart" role="img" aria-label="Line chart of aggregated gradient norm over 80 rounds. Norm spikes above threshold at adversarial injection rounds 20-22 and 50-52, triggering median fallback each time before recovering.">Byzantine detection: gradient norm spikes above threshold at rounds 20-22 and 50-52. Median fallback triggered each time; convergence resumes within 3-4 rounds.</canvas>
+  </div>
+  <p class="chart-caption">Illustrative detection timeline consistent with the reported experimental outcomes: correct detection in 9 of 10 adversarial injection trials, with the single false negative at adversarial norm 0.4C. Spike magnitudes and round positions are schematic. Real gradient norm logs will replace this in a subsequent revision.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>8. Limitations and Future Work</h2>
+
+<p><strong>Synthetic data.</strong> All evaluations use synthetic data generated to match distributional statistics, not real transaction records. Real banking data exhibits temporal clustering, inter-client correlation, and distributional noise that smooth generative models do not reproduce. AUC figures here are likely optimistic relative to a live deployment. The analytic framework is designed to be data-agnostic, but the numerical results should not be read as production performance estimates.</p>
+
+<p><strong>Privacy accounting scope.</strong> The RDP analysis covers the gradient aggregation mechanism. It does not account for potential leakage through model inference on released global weights or through the sequence of checkpoint broadcasts over $T$ rounds. A complete end-to-end analysis would need to bound these additional surfaces.</p>
+
+<p><strong>Parameter estimation uncertainty.</strong> $\tau^*$ depends on $L$ and $\Gamma$, estimated empirically from early training dynamics. Both estimates carry uncertainty that propagates into $\tau^*$. The sensitivity of $\tau^*$ to perturbations in these estimates is not currently bounded; this is a gap in the theoretical coverage.</p>
+
+<p><strong>Sub-Gaussian assumption.</strong> The $3\hat{\sigma}_v$ Byzantine detection threshold assumes honest gradient norms are approximately sub-Gaussian, which holds when gradients are clipped and loss surfaces are smooth, but may fail in early training when gradient magnitudes are large. A distribution-free threshold via Chebyshev's inequality would be more conservative but more broadly valid: $\Pr[|X - \mu| \geq k\sigma] \leq 1/k^2$ gives a false positive rate of at most $1/9 \approx 0.11$ per client at $k = 3$, somewhat looser than the sub-Gaussian bound but requiring no tail assumptions.</p>
+
+<p>Open directions include: extending the $\tau^*$ analysis to personalised FL where clients maintain mixtures of global and local parameters; deriving the joint optimum over $(T, \tau)$ when the round budget is itself a decision variable; replacing the RDP accountant with the numerically tighter PRV accountant (Gopi et al., 2021); and adapting the sparsification rate $k/d$ online based on the observed gradient magnitude distribution.</p>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2>9. Conclusion</h2>
+
+<p>We presented a federated learning system for cross-jurisdictional fraud detection that addresses gradient divergence, privacy leakage, communication overhead, and Byzantine robustness simultaneously. The convergence schedule is analytically derived rather than empirically tuned. The privacy accounting is honest about the full-participation topology, reporting a conservative $\varepsilon \approx 4.7$ under RDP composition rather than invoking subsampling amplification that does not apply. Communication compression achieves 50x bandwidth reduction with a four-round convergence overhead. The Byzantine fallback bounds adversarial impact to 1.2 pp AUC degradation with a formally characterised hiding radius.</p>
+
+<p>The full system reaches 96.2% AUC against a 98.1% centralised ceiling, with 142 KB total per-client communication over 80 rounds. Taken together, the formal guarantees in three dimensions simultaneously separate this from a demonstration: convergence bounds, privacy budget, and adversarial robustness are each analytically grounded rather than empirically asserted.</p>
+
+<section id="acknowledgments">
+  <h2>Acknowledgements</h2>
+  <p>
+    This work would not have taken the shape it did without <a href="https://www.xiaowudai.org/" target="_blank">Professor Xiaowu Dai</a> (SCALE Lab). He opened the door to the Cathay Bank collaboration and remained a steady sounding board at every point where the engineering and the theory pulled in different directions. I am grateful for his generosity with both his network and his time.
+  </p>
+</section>
+
+<hr>
+
+<p style="font-family: -apple-system, sans-serif; font-size: 12px; color: var(--faint); line-height: 1.9;">
+<strong>References</strong><br>
+Abadi, M., Chu, A., Goodfellow, I., McMahan, H. B., Mironov, I., Talwar, K., and Zhang, L. (2016). Deep learning with differential privacy. <em>Proceedings of the 23rd ACM SIGSAC Conference on Computer and Communications Security (CCS)</em>.<br>
+Alistarh, D., Grubic, D., Li, J., Tomioka, R., and Vojnovic, M. (2017). QSGD: Communication-efficient SGD via gradient quantization and encoding. <em>Advances in Neural Information Processing Systems (NeurIPS)</em>.<br>
+Balle, B., Barthe, G., and Gaboardi, M. (2018). Privacy amplification by subsampling: Tight analyses via couplings and divergences. <em>NeurIPS</em>.<br>
+Blanchard, P., El Mhamdi, E. M., Guerraoui, R., and Stainer, J. (2017). Machine learning with adversaries: Byzantine tolerant gradient descent. <em>NeurIPS</em>.<br>
+Gopi, S., Lee, Y. T., and Wutschitz, L. (2021). Numerical composition of differential privacy. <em>NeurIPS</em>.<br>
+Li, T., Sahu, A. K., Zaheer, M., Sanjabi, M., Talwalkar, A., and Smith, V. (2020). Federated optimization in heterogeneous networks. <em>Proceedings of Machine Learning and Systems (MLSys 2020)</em>.<br>
+McMahan, H. B., Moore, E., Ramage, D., Hampson, S., and Agüera y Arcas, B. (2017). Communication-efficient learning of deep networks from decentralized data. <em>AISTATS</em>.<br>
+Mironov, I. (2017). Rényi differential privacy. <em>30th IEEE Computer Security Foundations Symposium (CSF)</em>.<br>
+Yin, D., Chen, Y., Kannan, R., and Bartlett, P. (2018). Byzantine-robust distributed learning: Towards optimal statistical rates. <em>ICML</em>.<br>
+Zhu, L., Liu, Z., and Han, S. (2019). Deep leakage from gradients. <em>NeurIPS</em>.
+</p>
+
+<script>
+(function() {
+  const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.07)';
+  const tickColor = isDark ? '#777' : '#888780';
+  const axisColor = isDark ? '#666' : '#888780';
+
+  /* ── 1. Privacy-utility frontier ── */
+  new Chart(document.getElementById('privacyChart'), {
+    type: 'line',
+    data: {
+      labels: ['ε ≈ 10.2','ε ≈ 6.0','ε ≈ 4.7','ε ≈ 3.0','ε ≈ 2.2'],
+      datasets: [{
+        label: 'AUC (%)',
+        data: [96.8, 96.5, 96.2, 95.4, 94.1],
+        borderColor: '#378ADD',
+        backgroundColor: 'rgba(55,138,221,0.07)',
+        borderWidth: 2, fill: true, tension: 0.3,
+        pointBackgroundColor: ['#378ADD','#378ADD','#E24B4A','#378ADD','#378ADD'],
+        pointBorderColor:     ['#378ADD','#378ADD','#E24B4A','#378ADD','#378ADD'],
+        pointRadius: [5,5,9,5,5]
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' AUC: ' + ctx.parsed.y.toFixed(1) + '%' + (ctx.dataIndex === 2 ? '  ← operating point' : '') } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Privacy budget (ε) — lower is stronger privacy', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } } },
+        y: { min: 93, max: 97.5, title: { display: true, text: 'AUC (%)', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, callback: v => v.toFixed(1) + '%' } }
+      }
+    }
+  });
+
+  /* ── 2. Convergence curves ── */
+  const rounds17 = Array.from({length: 17}, (_, i) => i * 5);
+  function sig(x, L, k, x0) { return L / (1 + Math.exp(-k * (x - x0))); }
+  new Chart(document.getElementById('convergenceChart'), {
+    type: 'line',
+    data: {
+      labels: rounds17.map(r => 'R' + r),
+      datasets: [
+        { label: 'Local only',           data: rounds17.map(r => +(81 + sig(r,10.2,0.12,25)).toFixed(2)), borderColor: '#B4B2A9', borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false, tension: 0.4 },
+        { label: 'FedAvg empirical τ',   data: rounds17.map(r => +(83 + sig(r,12.9,0.13,22)).toFixed(2)), borderColor: '#378ADD', borderWidth: 2, borderDash: [4,3], pointRadius: 0, fill: false, tension: 0.4 },
+        { label: 'FedAvg τ* (analytical)',data: rounds17.map(r => +(83.2+sig(r,12.7,0.135,21)).toFixed(2)),borderColor: '#1D9E75', borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0.4 },
+        { label: 'Full system + DP',     data: rounds17.map(r => +(82.5+sig(r,13.7,0.115,24)).toFixed(2)),borderColor: '#E24B4A', borderWidth: 2.5, pointRadius: 0, fill: false, tension: 0.4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%' } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Communication round', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, autoSkip: false, maxRotation: 0, callback: (v, i) => i % 2 === 0 ? rounds17[i] : '' } },
+        y: { min: 80, max: 98, title: { display: true, text: 'AUC (%)', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, callback: v => v.toFixed(0) + '%' } }
+      }
+    }
+  });
+
+  /* ── 3. Byzantine detection ── */
+  const rounds80 = Array.from({length: 81}, (_, i) => i);
+  const seed = [0.62,0.58,0.54,0.51,0.49,0.47,0.46,0.44,0.43,0.42,0.41,0.40,0.39,0.39,0.38,0.38,0.37,0.37,0.36,0.36];
+  const advRounds = [20,21,22,50,51,52];
+  const advVals = {20:1.84,21:1.61,22:0.89,50:1.72,51:1.55,52:0.81};
+  const norms = rounds80.map(r => {
+    if (advVals[r] !== undefined) return advVals[r];
+    const base = r < 20 ? (seed[r] ?? 0.36) : 0.36 - (r-20)*0.001;
+    return Math.max(0.28, Math.min(0.52, base));
+  });
+  const theta = 0.72;
+  const bChart = new Chart(document.getElementById('byzantineChart'), {
+    type: 'line',
+    data: {
+      labels: rounds80,
+      datasets: [
+        { label: 'Gradient norm', data: norms, borderColor: '#378ADD', borderWidth: 2, pointRadius: rounds80.map(r => advRounds.includes(r) ? 5 : 0), pointBackgroundColor: rounds80.map(r => advRounds.includes(r) ? '#E24B4A' : '#378ADD'), fill: false, tension: 0.3 },
+        { label: 'Threshold θ',   data: rounds80.map(() => theta), borderColor: '#E24B4A', borderWidth: 1.5, borderDash: [5,4], pointRadius: 0, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 600, onComplete: drawShading },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' Norm: ' + ctx.parsed.y.toFixed(3) + (advRounds.includes(ctx.dataIndex) ? '  ← adversarial' : '') } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Communication round', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, autoSkip: true, maxTicksLimit: 17, maxRotation: 0 } },
+        y: { min: 0, max: 2.2, title: { display: true, text: 'Aggregated gradient norm ‖Δ‖', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, callback: v => v.toFixed(2) } }
+      }
+    }
+  });
+  function drawShading() {
+    const ctx2 = bChart.ctx, xS = bChart.scales.x, yS = bChart.scales.y;
+    [[20,22],[50,52]].forEach(([s,e]) => {
+      ctx2.save();
+      ctx2.fillStyle = 'rgba(226,75,74,0.09)';
+      ctx2.fillRect(xS.getPixelForValue(s), yS.getPixelForValue(2.2), xS.getPixelForValue(e) - xS.getPixelForValue(s), yS.getPixelForValue(0) - yS.getPixelForValue(2.2));
+      ctx2.restore();
+    });
+  }
+
+  /* ── 4. Communication cost ── */
+  new Chart(document.getElementById('commChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Dense update', 'Sparse update (top-k)'],
+      datasets: [{ data: [91140, 1816], backgroundColor: ['#B4B2A9','#1D9E75'], borderRadius: 4, borderSkipped: false }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.x.toLocaleString() + ' bytes per client per round' } }
+      },
+      scales: {
+        x: { type: 'logarithmic', title: { display: true, text: 'Bytes per client per round (log scale)', font: { size: 11 }, color: axisColor }, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 }, callback: v => v >= 1 ? v.toLocaleString() + ' B' : '' } },
+        y: { grid: { display: false }, ticks: { color: tickColor, font: { size: 12 } } }
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
+

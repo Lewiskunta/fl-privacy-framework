@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use or reference this work, please cite it as below."
+authors:
+  - family-names: Injai
+    given-names: Lewis Feisal
+    orcid: "https://orcid.org/0009-0003-4336-2909"
+title: "Mathematical Foundations of Federated Learning for Privacy-Preserving Analytics"
+version: 1.0.0
+date-released: 2023-11-01
+url: "https://lewiskunta.github.io/fl-privacy-framework/"
+license: CC-BY-NC-ND-4.0
+repository-code: "https://github.com/lewiskunta/fl-privacy-framework"
+abstract: "A federated learning system addressing four coupled engineering constraints
+  within a single framework: optimal aggregation frequency via closed-form tau*
+  derivation, differentially private gradient aggregation with honest RDP composition,
+  top-k gradient sparsification achieving 50x bandwidth reduction, and Byzantine-robust
+  aggregation with formally characterised adversarial hiding radius."
+keywords:
+  - federated learning
+  - differential privacy
+  - Byzantine robustness
+  - gradient compression
+  - fraud detection
+  - privacy-preserving machine learning
