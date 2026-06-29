@@ -50,7 +50,7 @@ Full results table and experimental setup in the paper.
 
 ## Data
 
-Training data was generated from distributional parameters supplied by Cathay Bank's data office — empirical feature distributions, fraud prevalence rates, and inter-branch heterogeneity statistics drawn from production records. No customer records were accessed at any stage. The same data localisation requirements the system is designed to satisfy governed the research collaboration itself.
+Training data was generated from distributional parameters supplied by Cathay Bank's data office - empirical feature distributions, fraud prevalence rates, and inter-branch heterogeneity statistics drawn from production records. No customer records were accessed at any stage. The same data localisation requirements the system is designed to satisfy governed the research collaboration itself.
 
 ---
 
